@@ -169,7 +169,8 @@ batch_matrix <- as.matrix(batch_table)
 explanation_text <- "
 Some batches (e.g., Batch 3) contain only one outcome type, which may indicate potential batch effects.\n Batch 2 has a mix of 'mTCC,' 'Normal,' and 'sTCC-CIS' samples, whereas Batch 4 and 5 are more specific\n to certain conditions. The imbalance in distribution, combined with the significant difference\n in the number of samples between batches (ranging from 4 to 19 samples), can introduce confounding effects.\n The differences between groups may be due to batch effects rather than true biological differences.\nThis variation in sample sizes across batches could impact downstream analyses, such as differential\n expression studies, leading to misleading results.\n
 "
-pdf("Stadnik_problem1.pdf", width = 7, height = 10)  # Increase height to fit both text and table
+
+pdf("batch_effects_summary.pdf", width = 7, height = 10)  # Increase height to fit both text and table
 grid.text(explanation_text, x = 0.5, y = 0.95, just = "top", gp = gpar(fontsize = 10, lineheight = 1.2))
 grid.table(batch_matrix, rows = NULL, vp = viewport(y = 0.45))  # Position the table lower
 dev.off() 
@@ -434,6 +435,31 @@ ggplot(mod_bott_tidy %>% filter(term == "as.factor(pdata$strain)DBA/2J")) +
 ggplot(modbattcombat_tidy %>% filter(term == "as.factor(pdata$strain)DBA/2J")) + 
   geom_histogram(aes(x=p.value), bins = 100, fill="darkorange") +
   ggtitle("Histogram of p-values: ComBat-Corrected Model")
+
+est_compare_bott <- tibble(
+  LinearModel_bottomly = mod_bott_tidy %>% filter(term == "as.factor(pdata$strain)DBA/2J") %>% select("estimate") %>% unlist,
+  ComBat_bottomly = modbattcombat_tidy %>% filter(term == "as.factor(pdata$strain)DBA/2J") %>% select("estimate") %>% unlist)
+
+plot1 <- ggplot(est_compare_bott, aes(x = LinearModel_bottomly, y = ComBat_bottomly)) +
+  geom_point(col = "darkgrey", alpha = .5, size = .5) + 
+  geom_abline(intercept = 0, slope = 1, col = "darkred") + 
+  geom_smooth(method = "lm", se = TRUE) + 
+  theme_bw()
+
+ggsave("Stadnik_problem4_1.png", plot = plot1)
+
+plot2 <- ggplot(mod_bott_tidy %>% filter(term == "as.factor(pdata$strain)DBA/2J")) + 
+  geom_histogram(aes(x = p.value), bins = 100, fill = "darkorange") +
+  ggtitle("Histogram of p-values: Uncorrected Model")
+
+ggsave("Stadnik_problem4_2.png", plot = plot2)
+
+plot3 <- ggplot(modbattcombat_tidy %>% filter(term == "as.factor(pdata$strain)DBA/2J")) + 
+  geom_histogram(aes(x = p.value), bins = 100, fill = "darkorange") +
+  ggtitle("Histogram of p-values: ComBat-Corrected Model")
+
+ggsave("Stadnik_problem4_3.png", plot = plot3)
+
 ```
 
 
@@ -582,21 +608,25 @@ est_compare <- tibble(
     filter(term == "as.factor(pdata$strain)DBA/2J") %>% pull(estimate)
 )
 
-ggplot(est_compare, aes(x=ComBat, y=SVA)) +
-  geom_point(color="grey30", alpha=0.5, size=0.7) +
-  geom_abline(slope=1, intercept=0, color="darkred") +
-  geom_smooth(method="lm", se=TRUE) +
+plot1 <- ggplot(est_compare, aes(x = ComBat, y = SVA)) +
+  geom_point(color = "grey30", alpha = 0.5, size = 0.7) +
+  geom_abline(slope = 1, intercept = 0, color = "darkred") +
+  geom_smooth(method = "lm", se = TRUE) +
   theme_bw() +
-  labs(title="Comparison of Coefficients: ComBat vs SVA")
+  labs(title = "Comparison of Coefficients: ComBat vs SVA")
 
-# Histogram for ComBat p-values
-ggplot(modbattcombat_tidy %>% filter(term == "as.factor(pdata$strain)DBA/2J")) + 
-  geom_histogram(aes(x=p.value), bins=100, fill="steelblue") + 
+ggsave("Stadnik_problem5_1.png", plot = plot1)
+
+plot2 <- ggplot(modbattcombat_tidy %>% filter(term == "as.factor(pdata$strain)DBA/2J")) + 
+  geom_histogram(aes(x = p.value), bins = 100, fill = "steelblue") + 
   ggtitle("ComBat p-values")
 
-# Histogram for SVA p-values
-ggplot(mod_sva_tidy_bott %>% filter(term == "as.factor(pdata$strain)DBA/2J")) + 
-  geom_histogram(aes(x=p.value), bins=100, fill="darkorange") + 
+ggsave("Stadnik_problem5_2.png", plot = plot2)
+
+plot3 <- ggplot(mod_sva_tidy_bott %>% filter(term == "as.factor(pdata$strain)DBA/2J")) + 
+  geom_histogram(aes(x = p.value), bins = 100, fill = "darkorange") + 
   ggtitle("SVA p-values")
+
+ggsave("Stadnik_problem5_3.png", plot = plot3)
 
 ```
