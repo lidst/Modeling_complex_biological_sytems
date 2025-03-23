@@ -169,8 +169,7 @@ batch_matrix <- as.matrix(batch_table)
 explanation_text <- "
 Some batches (e.g., Batch 3) contain only one outcome type, which may indicate potential batch effects.\n Batch 2 has a mix of 'mTCC,' 'Normal,' and 'sTCC-CIS' samples, whereas Batch 4 and 5 are more specific\n to certain conditions. The imbalance in distribution, combined with the significant difference\n in the number of samples between batches (ranging from 4 to 19 samples), can introduce confounding effects.\n The differences between groups may be due to batch effects rather than true biological differences.\nThis variation in sample sizes across batches could impact downstream analyses, such as differential\n expression studies, leading to misleading results.\n
 "
-
-pdf("batch_effects_summary.pdf", width = 7, height = 10)  # Increase height to fit both text and table
+pdf("Stadnik_problem1.pdf", width = 7, height = 10)  # Increase height to fit both text and table
 grid.text(explanation_text, x = 0.5, y = 0.95, just = "top", gp = gpar(fontsize = 10, lineheight = 1.2))
 grid.table(batch_matrix, rows = NULL, vp = viewport(y = 0.45))  # Position the table lower
 dev.off() 
