@@ -221,6 +221,7 @@ library(ggplot2)
 tsne_coords <- as.data.frame(Embeddings(pbmc, "tsne"))
 tsne_coords$subcluster <- pbmc$subcluster
 tsne_coords$kmeans_cluster <- pbmc$kmeans_cluster
+png("tsne_facet_by_kmeans_cluster.png", width = 3000, height = 2000, res = 300)
 ggplot(tsne_coords, aes(x = tSNE_1, y = tSNE_2, color = subcluster)) +
   geom_point(size = 0.5, alpha = 0.8) +
   facet_wrap(~ kmeans_cluster, ncol = 5) +
@@ -230,5 +231,5 @@ ggplot(tsne_coords, aes(x = tSNE_1, y = tSNE_2, color = subcluster)) +
   theme(strip.text = element_text(size = 10, face = "bold"),
         legend.position = "right",
         panel.spacing = unit(1, "lines"))
-
+dev.off()
 ```
