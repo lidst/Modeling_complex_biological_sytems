@@ -213,22 +213,22 @@ for (cluster_id in levels(pbmc$kmeans_cluster)) {
 ```
 
 ```{r tsne-subclusters, fig.height=15, fig.width=9}
-library(patchwork)  
-Idents(pbmc) <- pbmc$subcluster
+pbmc$kmeans_cluster <- as.factor(pbmc$kmeans_cluster)
+pbmc$subcluster <- as.factor(pbmc$subcluster)
+library(ggplot2)
 
-plots <- list()
+# Extract t-SNE coordinates
+tsne_coords <- as.data.frame(Embeddings(pbmc, "tsne"))
+tsne_coords$subcluster <- pbmc$subcluster
+tsne_coords$kmeans_cluster <- pbmc$kmeans_cluster
+ggplot(tsne_coords, aes(x = tSNE_1, y = tSNE_2, color = subcluster)) +
+  geom_point(size = 0.5, alpha = 0.8) +
+  facet_wrap(~ kmeans_cluster, ncol = 5) +
+  theme_minimal() +
+  labs(title = "t-SNE: Subclusters per Original K-means Cluster",
+       color = "Subcluster") +
+  theme(strip.text = element_text(size = 10, face = "bold"),
+        legend.position = "right",
+        panel.spacing = unit(1, "lines"))
 
-# Loop through each original K-means cluster and generate a DimPlot
-for (cluster_id in levels(pbmc$kmeans_cluster)) {
-  
-  cells_in_cluster <- WhichCells(pbmc, expression = kmeans_cluster == cluster_id)
-  subset_obj <- subset(pbmc, cells = cells_in_cluster)
-  
-  p <- DimPlot(subset_obj, reduction = "tsne", group.by = "subcluster", label = TRUE) +
-    ggtitle(paste("Cluster", cluster_id))
-  
-  plots[[cluster_id]] <- p
-}
-# Arrange all plots in a grid (2 rows x 5 columns)
-wrap_plots(plots, ncol = 3)
 ```
